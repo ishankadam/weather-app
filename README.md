@@ -56,12 +56,12 @@ npm run build     # production build
 
 This project does **not** use Redux, Zustand, or TanStack Query. State is split by responsibility:
 
-| Layer | Approach | Why |
-|--------|-----------|-----|
-| **Global UI preferences** | React Context — `TempUnitContext`, `FavoritesContext`, `SidebarContext` | Small, stable slices shared across routes (unit toggle, starred cities, sidebar open state). Context avoids extra dependencies and keeps providers easy to read in `App.tsx`. |
-| **Persistence** | `localStorage` inside contexts/hooks | Favorites, recent searches (last 5), and °C/°F preference survive reloads without a backend. |
-| **Server / API data** | Custom hooks (`useAsyncWeather`, `useCitySuggestions`, `useDebounce`) + component `useState` | Weather and forecast are fetched per screen with abort-on-unmount. Local state matches the request lifecycle and avoids caching stale data across unrelated views. |
-| **Routing** | React Router + URL search params | Forecast and “open city on dashboard” use query params so links are shareable and back/forward work. |
+| Layer                     | Approach                                                                                     | Why                                                                                                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Global UI preferences** | React Context — `TempUnitContext`, `FavoritesContext`, `SidebarContext`                      | Small, stable slices shared across routes (unit toggle, starred cities, sidebar open state). Context avoids extra dependencies and keeps providers easy to read in `App.tsx`. |
+| **Persistence**           | `localStorage` inside contexts/hooks                                                         | Favorites, recent searches (last 5), and °C/°F preference survive reloads without a backend.                                                                                  |
+| **Server / API data**     | Custom hooks (`useAsyncWeather`, `useCitySuggestions`, `useDebounce`) + component `useState` | Weather and forecast are fetched per screen with abort-on-unmount. Local state matches the request lifecycle and avoids caching stale data across unrelated views.            |
+| **Routing**               | React Router + URL search params                                                             | Forecast and “open city on dashboard” use query params so links are shareable and back/forward work.                                                                          |
 
 **Why not a global store for weather?** Weather is tied to the active city and route. Keeping it in hooks next to each page makes loading/error states obvious and prevents one global cache from serving the wrong city after navigation.
 
@@ -84,14 +84,14 @@ src/
 
 ## Review criteria alignment
 
-| Criterion | How this project addresses it |
-|-----------|-------------------------------|
-| **Clean, readable code** | Feature-based folders; shared `PageLayout`, `constants/ui`; no `any`; removed unused `App.css`; consistent naming (`CityQuery`, `geocodingToCityQuery`). |
-| **TypeScript quality** | Strict interfaces for all API shapes in `types/`; `WeatherErrorKind` union + `isWeatherErrorKind`; typed hooks and service layer; separate `tsconfig.test.json` for Jest. |
+| Criterion                  | How this project addresses it                                                                                                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Clean, readable code**   | Feature-based folders; shared `PageLayout`, `constants/ui`; no `any`; removed unused `App.css`; consistent naming (`CityQuery`, `geocodingToCityQuery`).                                                           |
+| **TypeScript quality**     | Strict interfaces for all API shapes in `types/`; `WeatherErrorKind` union + `isWeatherErrorKind`; typed hooks and service layer; separate `tsconfig.test.json` for Jest.                                          |
 | **Component architecture** | Home split into `CitySearchBar`, `CurrentWeatherHero`, `HourlyTomorrowSection`, `TodayHighlights`, `OtherCitiesGrid`; reusable `HighlightStatCard`, `WeatherCard`; custom hooks for geolocation and data fetching. |
-| **State management** | Context only for cross-route concerns (favorites, temp unit, sidebar); weather stays in `useAsyncWeather` per view; URL params for deep links; no unnecessary global store. |
-| **Testing** | 20 unit tests on debounce, temp conversion, forecast aggregation, API error mapping, URL city parsing, and error titles — logic-focused, not snapshots. |
-| **Responsive & polished** | MUI Grid breakpoints (`xs` / `sm` / `lg`); collapsible sidebar; striped dashboard background; loading skeletons; error cards with icons per error kind. |
+| **State management**       | Context only for cross-route concerns (favorites, temp unit, sidebar); weather stays in `useAsyncWeather` per view; URL params for deep links; no unnecessary global store.                                        |
+| **Testing**                | 20 unit tests on debounce, temp conversion, forecast aggregation, API error mapping, URL city parsing, and error titles — logic-focused, not snapshots.                                                            |
+| **Responsive & polished**  | MUI Grid breakpoints (`xs` / `sm` / `lg`); collapsible sidebar; striped dashboard background; loading skeletons; error cards with icons per error kind.                                                            |
 
 ## Trade-offs and shortcuts
 
@@ -112,7 +112,3 @@ src/
 5. **UX** — Skeleton layouts per section; offline/retry banner; `.env.example` in repo and stricter secret handling in docs/CI.
 6. **Forecast** — One Call API or daily aggregation with clearer “today vs future” boundaries and precipitation charts.
 7. **Code organization** — TanStack Query for server state; optional `SelectedCityContext` if URL-only selection becomes the single source of truth.
-
-## License
-
-Private / evaluation project — adjust as needed for your repository.
