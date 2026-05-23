@@ -1,70 +1,104 @@
-# Getting Started with Create React App
+# Weather Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A single-page weather app built with React and TypeScript. Search cities, view current conditions, browse a 5-day forecast with charts, and manage saved locations. Data comes from the [OpenWeatherMap](https://openweathermap.org/api) free tier.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Dashboard** — Auto-detects your location on load; debounced city search with geocoding autocomplete; current weather, hourly strip, tomorrow outlook, sunrise/sunset, and highlights (rain, UV, wind, humidity)
+- **5-day forecast** — Daily high/low, icons, Recharts temperature chart, °C/°F toggle (persisted)
+- **Saved locations** — Star cities, view weather in parallel, remove with confirmation; tap a card to open it on the dashboard
+- **Async handling** — Custom hooks with `AbortController` cleanup; loading, error, and empty states throughout
 
-### `npm start`
+## Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Prerequisites
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Node.js 18+ and npm
+- A free [OpenWeatherMap API key](https://home.openweathermap.org/api_keys)
 
-### `npm test`
+### Install and run
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+git clone <repository-url>
+cd weather-app
+npm install
+```
 
-### `npm run build`
+Create a `.env` file in the project root (do **not** commit this file):
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```env
+REACT_APP_API_KEY=your_openweathermap_api_key
+REACT_APP_API_URL=https://api.openweathermap.org/data/2.5
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Optional geocoding base URL (defaults to OpenWeather geocoding v1.0):
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```env
+REACT_APP_GEO_URL=https://api.openweathermap.org/geo/1.0
+```
 
-### `npm run eject`
+Start the dev server:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Open [http://localhost:3000](http://localhost:3000). Allow location access when prompted so the dashboard can load your city automatically.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Other commands
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm test          # unit tests (Jest + React Testing Library)
+npm run build     # production build
+```
 
-## Learn More
+## State management
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+This project does **not** use Redux, Zustand, or TanStack Query. State is split by responsibility:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+| Layer | Approach | Why |
+|--------|-----------|-----|
+| **Global UI preferences** | React Context — `TempUnitContext`, `FavoritesContext`, `SidebarContext` | Small, stable slices shared across routes (unit toggle, starred cities, sidebar open state). Context avoids extra dependencies and keeps providers easy to read in `App.tsx`. |
+| **Persistence** | `localStorage` inside contexts/hooks | Favorites, recent searches (last 5), and °C/°F preference survive reloads without a backend. |
+| **Server / API data** | Custom hooks (`useAsyncWeather`, `useCitySuggestions`, `useDebounce`) + component `useState` | Weather and forecast are fetched per screen with abort-on-unmount. Local state matches the request lifecycle and avoids caching stale data across unrelated views. |
+| **Routing** | React Router + URL search params | Forecast and “open city on dashboard” use query params so links are shareable and back/forward work. |
 
-### Code Splitting
+**Why not a global store for weather?** Weather is tied to the active city and route. Keeping it in hooks next to each page makes loading/error states obvious and prevents one global cache from serving the wrong city after navigation.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Project structure
 
-### Analyzing the Bundle Size
+```
+src/
+  components/     # UI (autocomplete, sidebar, weather cards)
+  context/        # TempUnit, Favorites, Sidebar providers
+  hooks/          # debounce, async weather, city suggestions, recent searches
+  pages/          # Home, Forecast, Cities (saved locations)
+  services/       # OpenWeather API client + error parsing
+  types/          # TypeScript interfaces for API shapes
+  utils/          # Formatting, forecast aggregation, temp conversion
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Trade-offs and shortcuts
 
-### Making a Progressive Web App
+- **OpenWeather 5-day forecast** — Uses the 3-hour / 5-day endpoint; daily values are aggregated in the client (`getFiveDayOutlook`), not the One Call API (separate paid tier).
+- **UV index** — Approximated from cloud cover on the dashboard, not a dedicated UV field from the API.
+- **“Other cities” on Home** — Shows four preset cities from `common.ts`, excluding the current city, rather than a user-configurable list.
+- **Geolocation fallback** — If permission is denied or lookup fails, defaults to Mumbai (first preset city).
+- **No backend** — API key is exposed in the browser via `REACT_APP_*` env vars; acceptable for a demo, not for production without a proxy.
+- **Create React App** — Stays on `react-scripts` 5 (no eject); test files use a separate `tsconfig.test.json` so production builds exclude Jest globals.
+- **Test coverage** — Focused unit tests on debounce, temperature conversion, and API error mapping; limited component/integration tests.
+- **Large page components** — `Home.tsx` holds layout and behavior in one file for speed; could be split into presentational subcomponents later.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## With more time, I would improve
 
-### Advanced Configuration
+1. **API layer** — BFF or serverless proxy to hide the API key; optional Redis/memory cache for rate limits.
+2. **Data fetching** — TanStack Query (or RTK Query) for deduplication, retries, stale-while-revalidate, and simpler cache invalidation when switching cities.
+3. **Testing** — Component tests for search, favorites, and error UI; MSW for stable API mocks in CI.
+4. **Accessibility** — Audit focus order, live regions for loading/errors, and keyboard flows for autocomplete and cards.
+5. **UX** — Skeleton layouts per section; offline/retry banner; `.env.example` in repo and stricter secret handling in docs/CI.
+6. **Forecast** — One Call API or daily aggregation with clearer “today vs future” boundaries and precipitation charts.
+7. **Code organization** — Extract `Home` sections into smaller components; shared `useGeolocation` hook; centralize city selection in context or URL-only state.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## License
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Private / evaluation project — adjust as needed for your repository.
