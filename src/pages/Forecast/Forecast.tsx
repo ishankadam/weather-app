@@ -4,9 +4,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { useTheme } from "@mui/material/styles";
 import { useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import PageLayout from "../../components/layout/PageLayout";
 import {
   CartesianGrid,
   Line,
@@ -22,7 +22,6 @@ import {
   WeatherCard,
   WeatherErrorAlert,
 } from "../../components/weather/WeatherStates";
-import { SIDEBAR_LEFT_OFFSET } from "../../context/SidebarContext";
 import { useTempUnit } from "../../context/TempUnitContext";
 import { useAsyncWeather } from "../../hooks/useAsyncWeather";
 import { getCityForecast } from "../../services/weatherApi";
@@ -37,7 +36,6 @@ import {
 } from "../../utils/weatherUtils";
 
 const Forecast = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const city = searchParamsToCityQuery(searchParams);
@@ -70,49 +68,22 @@ const Forecast = () => {
 
   if (!city) {
     return (
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          minHeight: "100vh",
-          pt: { xs: 9, lg: 2 },
-          pl: { xs: 2, lg: `${SIDEBAR_LEFT_OFFSET}px` },
-          pr: { xs: 2, md: 3 },
-        }}
-      >
+      <PageLayout maxWidth={1000}>
         <EmptyState
           title="No city selected"
           description="Search for a city on the dashboard, then open its forecast from there."
         />
         <Box sx={{ mt: 2, textAlign: "center" }}>
-          <Link to="/">Back to search</Link>
+          <Link to="/">Back to dashboard</Link>
         </Box>
-      </Box>
+      </PageLayout>
     );
   }
 
   const title = formatCityLabel(city.name, city.country);
 
   return (
-    <Box
-      component="main"
-      sx={{
-        flex: 1,
-        minWidth: 0,
-        minHeight: "100vh",
-        pt: { xs: 9, lg: 2 },
-        pb: { xs: 2, md: 3 },
-        pr: { xs: 2, md: 3 },
-        pl: { xs: 2, lg: `${SIDEBAR_LEFT_OFFSET}px` },
-        boxSizing: "border-box",
-        transition: theme.transitions.create(["padding"], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-      }}
-    >
-      <Box sx={{ maxWidth: 1000, mx: "auto", width: "100%" }}>
+    <PageLayout maxWidth={1000}>
         <Box
           sx={{
             display: "flex",
@@ -220,8 +191,7 @@ const Forecast = () => {
             </Grid>
           </>
         )}
-      </Box>
-    </Box>
+    </PageLayout>
   );
 };
 

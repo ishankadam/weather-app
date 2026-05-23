@@ -11,9 +11,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { alpha, useTheme } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PageLayout from "../../components/layout/PageLayout";
 import {
   EmptyState,
   WeatherCard,
@@ -21,7 +22,6 @@ import {
 } from "../../components/weather/WeatherStates";
 import { toCityQuery, useFavorites } from "../../context/FavoritesContext";
 import { cityQueryToSearchParams } from "../../utils/cityQuery";
-import { SIDEBAR_LEFT_OFFSET } from "../../context/SidebarContext";
 import { useTempUnit } from "../../context/TempUnitContext";
 import { getFavoritesWeather, parseApiError } from "../../services/weatherApi";
 import { CurrentWeatherResponse, SavedCity } from "../../types";
@@ -34,7 +34,6 @@ import {
 } from "../../utils/weatherUtils";
 
 const Cities = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { favorites, removeFavorite } = useFavorites();
   const { unit } = useTempUnit();
@@ -98,27 +97,7 @@ const Cities = () => {
   };
 
   return (
-    <Box
-      component="main"
-      sx={{
-        flex: 1,
-        minWidth: 0,
-        minHeight: "100vh",
-        pt: { xs: 9, lg: 2 },
-        pb: { xs: 2, md: 3 },
-        pr: { xs: 2, md: 3 },
-        pl: { xs: 2, lg: `${SIDEBAR_LEFT_OFFSET}px` },
-        width: "100%",
-        maxWidth: "100vw",
-        overflowX: "hidden",
-        boxSizing: "border-box",
-        transition: theme.transitions.create(["padding"], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-      }}
-    >
-      <Box sx={{ maxWidth: 1200, mx: "auto", width: "100%" }}>
+    <PageLayout maxWidth={1200}>
         <Typography variant="h5" sx={{ fontWeight: 700, mt: 3, mb: 1 }}>
           Saved Locations
         </Typography>
@@ -243,7 +222,6 @@ const Cities = () => {
             })}
           </Grid>
         )}
-      </Box>
 
       <Dialog
         open={Boolean(pendingRemove)}
@@ -280,7 +258,7 @@ const Cities = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

@@ -1,11 +1,8 @@
-import { CityQuery, GeocodingResult } from "../types";
+import { CityQuery } from "../types";
+import { geocodingToCityQuery } from "./cityMappers";
 
-export const geocodingToQuery = (result: GeocodingResult): CityQuery => ({
-  name: result.name,
-  country: result.country,
-  lat: result.lat,
-  lon: result.lon,
-});
+/** @deprecated Use geocodingToCityQuery from cityMappers */
+export const geocodingToQuery = geocodingToCityQuery;
 
 export const cityQueryToSearchParams = (city: CityQuery) => {
   const params = new URLSearchParams({

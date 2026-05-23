@@ -8,6 +8,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
 import { WeatherError } from "../../types";
+import { getWeatherErrorTitle } from "../../utils/weatherError";
 
 const CARD_BG = "#161a28";
 const CARD_BORDER = "1px solid rgba(255, 255, 255, 0.06)";
@@ -115,13 +116,7 @@ export const WeatherErrorAlert = ({ error }: { error: WeatherError }) => {
     >
       <Icon sx={{ fontSize: 48, color: "error.main", mb: 1 }} />
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-        {error.kind === "not_found"
-          ? "City not found"
-          : error.kind === "rate_limit"
-            ? "Rate limit reached"
-            : error.kind === "network"
-              ? "Connection problem"
-              : "Something went wrong"}
+        {getWeatherErrorTitle(error)}
       </Typography>
       <Typography variant="body2" color="text.secondary">
         {error.message}

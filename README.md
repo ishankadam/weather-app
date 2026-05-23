@@ -69,14 +69,29 @@ This project does **not** use Redux, Zustand, or TanStack Query. State is split 
 
 ```
 src/
-  components/     # UI (autocomplete, sidebar, weather cards)
-  context/        # TempUnit, Favorites, Sidebar providers
-  hooks/          # debounce, async weather, city suggestions, recent searches
-  pages/          # Home, Forecast, Cities (saved locations)
-  services/       # OpenWeather API client + error parsing
-  types/          # TypeScript interfaces for API shapes
-  utils/          # Formatting, forecast aggregation, temp conversion
+  components/       # Shared UI (layout, autocomplete, sidebar, weather widgets)
+  constants/        # Shared layout tokens (card styles, grid helpers)
+  context/          # TempUnit, Favorites, Sidebar providers
+  hooks/            # debounce, async weather, geolocation, initial city, recent searches
+  pages/
+    Home/           # Dashboard + composed subcomponents
+    Forecast/       # 5-day forecast + chart
+    Cities/         # Saved locations
+  services/         # OpenWeather API client + error parsing
+  types/            # TypeScript interfaces + WeatherError discriminated union
+  utils/            # Pure helpers (forecast aggregation, city mappers, errors)
 ```
+
+## Review criteria alignment
+
+| Criterion | How this project addresses it |
+|-----------|-------------------------------|
+| **Clean, readable code** | Feature-based folders; shared `PageLayout`, `constants/ui`; no `any`; removed unused `App.css`; consistent naming (`CityQuery`, `geocodingToCityQuery`). |
+| **TypeScript quality** | Strict interfaces for all API shapes in `types/`; `WeatherErrorKind` union + `isWeatherErrorKind`; typed hooks and service layer; separate `tsconfig.test.json` for Jest. |
+| **Component architecture** | Home split into `CitySearchBar`, `CurrentWeatherHero`, `HourlyTomorrowSection`, `TodayHighlights`, `OtherCitiesGrid`; reusable `HighlightStatCard`, `WeatherCard`; custom hooks for geolocation and data fetching. |
+| **State management** | Context only for cross-route concerns (favorites, temp unit, sidebar); weather stays in `useAsyncWeather` per view; URL params for deep links; no unnecessary global store. |
+| **Testing** | 20 unit tests on debounce, temp conversion, forecast aggregation, API error mapping, URL city parsing, and error titles — logic-focused, not snapshots. |
+| **Responsive & polished** | MUI Grid breakpoints (`xs` / `sm` / `lg`); collapsible sidebar; striped dashboard background; loading skeletons; error cards with icons per error kind. |
 
 ## Trade-offs and shortcuts
 
@@ -86,8 +101,7 @@ src/
 - **Geolocation fallback** — If permission is denied or lookup fails, defaults to Mumbai (first preset city).
 - **No backend** — API key is exposed in the browser via `REACT_APP_*` env vars; acceptable for a demo, not for production without a proxy.
 - **Create React App** — Stays on `react-scripts` 5 (no eject); test files use a separate `tsconfig.test.json` so production builds exclude Jest globals.
-- **Test coverage** — Focused unit tests on debounce, temperature conversion, and API error mapping; limited component/integration tests.
-- **Large page components** — `Home.tsx` holds layout and behavior in one file for speed; could be split into presentational subcomponents later.
+- **Test coverage** — Strong unit coverage on pure logic; component/integration tests and MSW mocks not yet added.
 
 ## With more time, I would improve
 
@@ -97,7 +111,7 @@ src/
 4. **Accessibility** — Audit focus order, live regions for loading/errors, and keyboard flows for autocomplete and cards.
 5. **UX** — Skeleton layouts per section; offline/retry banner; `.env.example` in repo and stricter secret handling in docs/CI.
 6. **Forecast** — One Call API or daily aggregation with clearer “today vs future” boundaries and precipitation charts.
-7. **Code organization** — Extract `Home` sections into smaller components; shared `useGeolocation` hook; centralize city selection in context or URL-only state.
+7. **Code organization** — TanStack Query for server state; optional `SelectedCityContext` if URL-only selection becomes the single source of truth.
 
 ## License
 

@@ -1,10 +1,7 @@
-/// <reference types="vite/client" />
+/// <reference types="react-scripts" />
 
 interface ImportMetaEnv {
-  readonly VITE_API_KEY: string;
-  readonly VITE_API_URL: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+  readonly REACT_APP_API_KEY: string;
+  readonly REACT_APP_API_URL: string;
+  readonly REACT_APP_GEO_URL?: string;
 }
